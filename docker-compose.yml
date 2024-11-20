@@ -1,0 +1,80 @@
+version: '3.9'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    networks:
+      - docker-dmz
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/etc/prometheus
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    networks:
+      - docker-dmz
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  db1:
+    image: mysql:latest
+    container_name: db1
+    networks:
+      - docker-dmz
+    environment:
+      MYSQL_ROOT_PASSWORD: root0000
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  db2:
+    image: mysql:latest
+    container_name: db2
+    networks:
+      - docker-dmz
+    environment:
+      MYSQL_ROOT_PASSWORD: root0000
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data2:/var/lib/mysql
+
+  respaldos:
+    image: alpine:latest
+    container_name: respaldos
+    restart: unless-stopped
+    networks:
+      - docker-dmz
+    ports:
+      - "2049:2049"
+    volumes:
+      - backups:/var/backups
+
+  firewall:
+    image: alpine:latest
+    container_name: firewall
+    restart: unless-stopped
+    networks:
+      - docker-lan
+    ports:
+      - "22:22"
+
+networks:
+  docker-dmz:
+    driver: bridge
+  docker-lan:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  mysql_data:
+  mysql_data2:
+  backups:
+
